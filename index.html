@@ -14,9 +14,12 @@
             --secondary-color: #ff99ac;
             --accent-color: #fff0f3;
             --text-color: #fff;
-            --bg-gradient: linear-gradient(135deg, #2e001f 0%, #680026 100%);
+            /* Richer, deeper red/pink gradient for a premium feel */
+            --bg-gradient: linear-gradient(135deg, #2b0c14 0%, #4a0f1d 100%);
             --glass-bg: rgba(255, 255, 255, 0.05);
             --glass-border: rgba(255, 255, 255, 0.1);
+            --heart-color: rgba(255, 105, 180, 0.25);
+            --grid-line: rgba(255, 255, 255, 0.03);
         }
 
         * {
@@ -37,39 +40,83 @@
             color: var(--text-color);
             perspective: 1000px;
             padding: 40px 0;
+            /* Hide overflow for the background grid */
+            position: relative;
         }
 
-        /* Particle Background */
-        #particles {
-            position: absolute;
+        /* Heart Grid Background */
+        #heart-grid {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: -1;
             pointer-events: none;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start; /* Ensure rows start from top */
+            /* Stylish grid lines */
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 50px 50px;
+            overflow: hidden;
         }
 
-        .particle {
-            position: absolute;
+        .grid-item {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            flex-shrink: 0; /* detailed sizing for perfect alignment */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* CSS Heart Shape */
+        .heart {
+            background-color: var(--heart-color);
+            width: 16px;
+            height: 16px;
+            position: relative;
+            transform: rotate(-45deg);
+            opacity: 0; /* Starts invisible, animates in */
+            animation: heartbeat 3s infinite ease-in-out;
+        }
+
+        .heart::before,
+        .heart::after {
+            content: "";
+            background-color: var(--heart-color);
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            animation: float 10s infinite linear;
+            position: absolute;
         }
 
-        @keyframes float {
+        .heart::before {
+            top: -8px;
+            left: 0;
+        }
+
+        .heart::after {
+            left: 8px;
+            top: 0;
+        }
+
+        @keyframes heartbeat {
             0% {
-                transform: translateY(100vh) scale(0);
-                opacity: 0;
+                transform: rotate(-45deg) scale(0.8);
+                opacity: 0.1;
             }
-
             50% {
-                opacity: 0.8;
+                transform: rotate(-45deg) scale(1.2);
+                opacity: 0.4;
             }
-
             100% {
-                transform: translateY(-10vh) scale(1);
-                opacity: 0;
+                transform: rotate(-45deg) scale(0.8);
+                opacity: 0.1;
             }
         }
 
@@ -278,7 +325,7 @@
 
 <body>
 
-    <div id="particles"></div>
+    <div id="heart-grid"></div>
 
     <!-- Screen 1: Intro -->
     <div class="container active" id="screen-intro">
@@ -349,21 +396,50 @@
         const loveLetterText = "Jab tumse pehli baar mulaqat hui,\njaise khud se hi ek baat hui,\nwaqt ruk sa gaya tha us pal,\naur dil ko tumhari aadat hui,\n\ntum muskuraye toh mehfil roshan ho gayi,\nsaanson ko ek nayi rahat hui,\nlagta hai iss dil ko aakhir,\napni mohabbat ki shuruaat hui.";
         /* --------------------- */
 
-        // Particle System
-        function createParticles() {
-            const container = document.getElementById('particles');
-            for (let i = 0; i < 30; i++) {
-                const p = document.createElement('div');
-                p.classList.add('particle');
-                p.style.left = Math.random() * 100 + 'vw';
-                p.style.width = Math.random() * 10 + 5 + 'px';
-                p.style.height = p.style.width;
-                p.style.animationDuration = Math.random() * 10 + 10 + 's';
-                p.style.animationDelay = Math.random() * 10 + 's';
-                container.appendChild(p);
+        // Heart Grid System (Replaces Particles)
+        function createHeartGrid() {
+            const gridContainer = document.getElementById('heart-grid');
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            // Grid size is 50x50, calculate how many items we need
+            const cols = Math.ceil(width / 50);
+            const rows = Math.ceil(height / 50);
+            const totalItems = cols * rows;
+
+            gridContainer.innerHTML = ''; // Clear existing
+
+            for (let i = 0; i < totalItems; i++) {
+                const gridItem = document.createElement('div');
+                gridItem.classList.add('grid-item');
+                
+                // Randomly Place hearts - not every grid cell needs one, let's say 40% chance
+                if (Math.random() < 0.4) {
+                    const heart = document.createElement('div');
+                    heart.classList.add('heart');
+                    
+                    // Random animation delay for sparkling effect
+                    heart.style.animationDelay = (Math.random() * 4) + 's';
+                    // Random slight size variation
+                    const scaleVar = 0.8 + Math.random() * 0.4; 
+                   // We handle scale in keyframes, but can adjust base font-size or transform if needed.
+                   // Let's just rely on the delay for variety.
+                   
+                    gridItem.appendChild(heart);
+                }
+                
+                gridContainer.appendChild(gridItem);
             }
         }
-        createParticles();
+        
+        // Re-create grid on resize to keep it looking good
+        window.addEventListener('resize', () => {
+             // Debounce slightly potentially, but for now direct call is fine for this scale
+             createHeartGrid();
+        });
+
+        // Initialize
+        createHeartGrid();
 
         // Screen Navigation
         function nextScreen(targetId) {
