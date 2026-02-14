@@ -28,13 +28,15 @@
         body {
             font-family: 'Poppins', sans-serif;
             background: var(--bg-gradient);
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             color: var(--text-color);
             perspective: 1000px;
+            padding: 40px 0;
         }
 
         /* Particle Background */
